@@ -336,8 +336,33 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Copy link button functionality
-    document.getElementById('copyLink').addEventListener('click', () => {
+    // Share button handlers
+    document.getElementById('shareWhatsApp').addEventListener('click', (e) => {
+        e.preventDefault(); // Prevent form submission
+        const text = getShareText();
+        const url = document.getElementById('shareLink').value;
+        window.open(`https://wa.me/?text=${encodeURIComponent(text + '\n\n' + url)}`, '_blank');
+        return false;
+    });
+
+    document.getElementById('shareTelegram').addEventListener('click', (e) => {
+        e.preventDefault(); // Prevent form submission
+        const text = getShareText();
+        const url = document.getElementById('shareLink').value;
+        window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`, '_blank');
+        return false;
+    });
+
+    document.getElementById('shareTwitter').addEventListener('click', (e) => {
+        e.preventDefault(); // Prevent form submission
+        const text = getShareText();
+        const url = document.getElementById('shareLink').value;
+        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+        return false;
+    });
+
+    document.getElementById('copyLink').addEventListener('click', (e) => {
+        e.preventDefault(); // Prevent form submission
         const shareLinkInput = document.getElementById('shareLink');
         const url = shareLinkInput.value;
         
@@ -360,14 +385,82 @@ document.addEventListener('DOMContentLoaded', function() {
                 showNotification('فشل نسخ الرابط | Failed to copy link');
             }
         }
+        return false;
     });
 
-    // Initialize progress bars
-    function initializeProgress() {
+    // Main share button functionality
+    document.getElementById('shareButton').addEventListener('click', (e) => {
+        e.preventDefault(); // Prevent form submission
+        updateShareLink(); // Ensure link is up to date
+        const text = getShareText();
+        const url = document.getElementById('shareLink').value;
+
+        if (navigator.share) {
+            navigator.share({
+                title: 'Digital Dhikr Page',
+                text: text,
+                url: url
+            }).catch(err => {
+                console.error('Error sharing:', err);
+                fallbackShare();
+            });
+        } else {
+            fallbackShare();
+        }
+
+        function fallbackShare() {
+            const shareLinkInput = document.getElementById('shareLink');
+            shareLinkInput.classList.remove('hidden');
+            shareLinkInput.select();
+            try {
+                navigator.clipboard.writeText(url).then(() => {
+                    showNotification('تم نسخ الرابط | Link copied to clipboard');
+                }).catch(() => {
+                    document.execCommand('copy');
+                    showNotification('تم نسخ الرابط | Link copied to clipboard');
+                });
+            } catch (err) {
+                console.error('Copy failed:', err);
+                showNotification('فشل نسخ الرابط | Failed to copy link');
+            }
+        }
+        return false;
+    });
+
+    // Function to get share text
+    function getShareText() {
+        const nameElement = document.getElementById('deceasedName');
+        const name = nameElement.querySelector('.name-english').textContent.replace('For the deceased: ', '');
+        const gender = document.querySelector('input[name="editGender"]:checked').value;
+        const prefix = gender === 'male' ? 'المرحوم' : 'المرحومة';
+        return `${prefix} ${name} | Please make Dhikr for the deceased 🤲`;
+    }
+
+    // Update share link with current state
+    function updateShareLink() {
+        const name = document.getElementById('deceasedName').querySelector('.name-english').textContent.replace('For the deceased: ', '');
+        const gender = document.querySelector('input[name="editGender"]:checked').value;
+        const url = new URL(window.location.href);
+        
+        // Update URL parameters
+        url.searchParams.set('name', encodeURIComponent(name));
+        url.searchParams.set('gender', gender);
+        
+        // Add dhikr counts and targets
         Object.keys(counters).forEach(type => {
-            updateProgress(type);
+            url.searchParams.set(`${type}_target`, targets[type]);
+            url.searchParams.set(`${type}_count`, counters[type]);
         });
-    }    // Function to handle name change and reset counters
+
+        // Update the share link input
+        const shareLinkInput = document.getElementById('shareLink');
+        shareLinkInput.value = url.toString();
+    }
+
+    // Update the save button click handler
+    document.getElementById('saveNameButton').addEventListener('click', handleNameChange);
+
+    // Function to handle name change and reset counters
     function handleNameChange() {
         const newName = document.getElementById('editNameInput').value.trim();
         const gender = document.querySelector('input[name="editGender"]:checked').value;
@@ -453,137 +546,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 500);
     }
 
-    // Update the save button click handler
-    document.getElementById('saveNameButton').addEventListener('click', handleNameChange);
-
-    // Update share link and text
-    function updateShareLink() {
-        const name = document.getElementById('deceasedName').querySelector('.name-english').textContent.replace('For the deceased: ', '');
-        const gender = document.querySelector('input[name="editGender"]:checked').value;
-        const url = new URL(window.location.href);
-        
-        // Update URL parameters
-        url.searchParams.set('name', encodeURIComponent(name));
-        url.searchParams.set('gender', gender);
-
-        // Add targets to URL
-        Object.entries(targets).forEach(([type, value]) => {
-            url.searchParams.set(`${type}_target`, value);
+    // Initialize progress bars
+    function initializeProgress() {
+        Object.keys(counters).forEach(type => {
+            updateProgress(type);
         });
-
-        // Set the share link
-        const shareLinkInput = document.getElementById('shareLink');
-        shareLinkInput.value = url.toString();
-
-        // Update individual sharing buttons
-        const text = `${gender === 'male' ? 'المرحوم' : 'المرحومة'} ${name} | Please make dhikr for the deceased 🤲`;
-        const encodedText = encodeURIComponent(text);
-        const encodedUrl = encodeURIComponent(url.toString());
-
-        // Update WhatsApp button
-        document.getElementById('shareWhatsApp').onclick = () => {
-            window.open(`https://wa.me/?text=${encodedText}%0A%0A${encodedUrl}`, '_blank');
-        };
-
-        // Update Telegram button
-        document.getElementById('shareTelegram').onclick = () => {
-            window.open(`https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`, '_blank');
-        };
-
-        // Update Twitter button
-        document.getElementById('shareTwitter').onclick = () => {
-            window.open(`https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`, '_blank');
-        };
-    }
-
-    // Function to get share text
-    function getShareText() {
-        const nameElement = document.getElementById('deceasedName');
-        const name = nameElement.querySelector('.name-english').textContent.replace('For the deceased: ', '');
-        const gender = document.querySelector('input[name="editGender"]:checked').value;
-        const prefix = gender === 'male' ? 'المرحوم' : 'المرحومة';
-        return `${prefix} ${name} | Please make Dhikr for the deceased`;
-    }
-
-    // Social share buttons
-    document.getElementById('shareWhatsApp').addEventListener('click', function() {
-        const text = getShareText();
-        const url = document.getElementById('shareLink').value;
-        window.open(`https://wa.me/?text=${encodeURIComponent(text + '\n\n' + url)}`, '_blank');
-    });
-
-    document.getElementById('shareTelegram').addEventListener('click', function() {
-        const text = getShareText();
-        const url = document.getElementById('shareLink').value;
-        window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`, '_blank');
-    });
-
-    document.getElementById('shareTwitter').addEventListener('click', function() {
-        const text = getShareText();
-        const url = document.getElementById('shareLink').value;
-        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
-    });
-
-    document.getElementById('copyLink').addEventListener('click', function() {
-        const shareLink = document.getElementById('shareLink');
-        shareLink.select();
-        document.execCommand('copy');
-        showNotification('تم نسخ الرابط | Link copied');
-    });
-
-    // Notification function
-    function showNotification(message) {
-        // Create notification element
-        const notification = document.createElement('div');
-        notification.className = 'notification';
-        notification.textContent = message;
-        document.body.appendChild(notification);
-
-        // Add show class after a small delay (for animation)
-        setTimeout(() => {
-            notification.classList.add('show');
-            // Remove notification after 2 seconds
-            setTimeout(() => {
-                notification.classList.remove('show');
-                setTimeout(() => {
-                    notification.remove();
-                }, 300);
-            }, 2000);
-        }, 100);
-    }
-
-    // Add notification styles
-    const style = document.createElement('style');
-    style.textContent = `
-    .notification {
-        position: fixed;
-        bottom: 20px;
-        left: 50%;
-        transform: translateX(-50%) translateY(100px);
-        background: var(--primary-color);
-        color: white;
-        padding: 1rem 2rem;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        z-index: 1000;
-        opacity: 0;
-        transition: all 0.3s ease;
-    }
-
-    .notification.show {
-        transform: translateX(-50%) translateY(0);
-        opacity: 1;
-    }
-    `;
-    document.head.appendChild(style);
-
-    // Update share link whenever counts change
-    function updateCountAndShare(type, newCount) {
-        // ...existing code...
-        updateShareLink();
-    }
-
-    // Function to update duas based on gender
+    }    // Function to update duas based on gender
     function updateDuasForGender(gender) {
         const allDuas = document.querySelectorAll('.duaa-text');
         
