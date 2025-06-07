@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Dhikr Page</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="main-title">صفحة الذكر الرقمية<br>Digital Dhikr Page</h1>
+        </header>
+
+        <div class="form-section" id="inputForm">
+            <h2>إنشاء صفحة جديدة | Create New Page</h2>
+            <div class="input-group">
+                <label for="name">اسم المتوفى | Deceased Name:</label>
+                <input type="text" id="name" placeholder="Enter name | أدخل الاسم" required>
+            </div>
+            
+            <div class="input-group">
+                <label>الجنس | Gender:</label>
+                <div class="radio-group">
+                    <input type="radio" id="male" name="gender" value="male" checked>
+                    <label for="male">ذكر | Male</label>
+                    <input type="radio" id="female" name="gender" value="female">
+                    <label for="female">أنثى | Female</label>
+                </div>
+            </div>
+
+            <div class="dhikr-targets">
+                <h3>أهداف الذكر | Dhikr Targets</h3>
+                <div class="target-input">
+                    <label for="tasbih">سبحان الله | Subhan Allah:</label>
+                    <input type="number" id="tasbih" value="33" min="1">
+                </div>
+                <div class="target-input">
+                    <label for="tahmeed">الحمد لله | Alhamdulillah:</label>
+                    <input type="number" id="tahmeed" value="33" min="1">
+                </div>                <div class="target-input">
+                    <label for="takbeer">الله أكبر | Allahu Akbar:</label>
+                    <input type="number" id="takbeer" value="34" min="1">
+                </div>
+                <div class="target-input">
+                    <label for="tahleel">لا إله إلا الله | La ilaha illa Allah:</label>
+                    <input type="number" id="tahleel" value="33" min="1">
+                </div>
+                <div class="target-input">
+                    <label for="salawat">اللهم صل وسلم على نبينا محمد | Salawat:</label>
+                    <input type="number" id="salawat" value="33" min="1">
+                </div>
+            </div>
+
+            <button id="createPage" class="btn-create">إنشاء الصفحة | Create Page</button>
+        </div>
+
+        <div class="dhikr-section hidden" id="dhikrPage">            <div class="deceased-info">
+                <h2 id="deceasedName"></h2>
+                <div class="duas-container">
+                    <p class="duaa-text main-dua" id="duaaText"></p>
+                    <div class="additional-duas">
+                        <p class="duaa-text">
+                            اللهم اغفر له وارحمه وعافه واعف عنه، وأكرم نزله، ووسع مدخله
+                            <br>
+                            O Allah, forgive them, have mercy on them, pardon them, grant them dignity, and make their entry (into paradise) spacious
+                        </p>
+                        <p class="duaa-text">
+                            اللهم اجعل قبره روضة من رياض الجنة، ولا تجعله حفرة من حفر النار
+                            <br>
+                            O Allah, make their grave a garden from the gardens of Paradise, and not a pit from the pits of Hell
+                        </p>
+                        <p class="duaa-text">
+                            اللهم نور له في قبره وافسح له فيه
+                            <br>
+                            O Allah, illuminate their grave and make it spacious for them
+                        </p>
+                        <p class="duaa-text">
+                            اللهم إن كان محسناً فزد في إحسانه، وإن كان مسيئاً فتجاوز عن سيئاته
+                            <br>
+                            O Allah, if they were good, increase their goodness, and if they committed sins, overlook their sins
+                        </p>
+                        <p class="duaa-text">
+                            اللهم اجعله في الفردوس الأعلى من الجنة
+                            <br>
+                            O Allah, grant them the highest level of Paradise, Al-Firdaus
+                        </p>
+                        <p class="duaa-text">
+                            رَبَّنَا اغْفِرْ لَنَا وَلِإِخْوَانِنَا الَّذِينَ سَبَقُونَا بِالْإِيمَانِ
+                            <br>
+                            Our Lord, forgive us and our brothers who preceded us in faith
+                        </p>
+                    </div>
+                </div>
+            </div><div class="counters">
+                <div class="dhikr-counter">
+                    <button class="dhikr-btn" data-type="tasbih">
+                        سبحان الله<br>Subhan Allah
+                        <span class="count" id="tasbihCount">0</span>/<span class="target" id="tasbihTarget">33</span>
+                    </button>
+                </div>
+                <div class="dhikr-counter">
+                    <button class="dhikr-btn" data-type="tahmeed">
+                        الحمد لله<br>Alhamdulillah
+                        <span class="count" id="tahmeedCount">0</span>/<span class="target" id="tahmeedTarget">33</span>
+                    </button>
+                </div>
+                <div class="dhikr-counter">
+                    <button class="dhikr-btn" data-type="takbeer">
+                        الله أكبر<br>Allahu Akbar
+                        <span class="count" id="takbeerCount">0</span>/<span class="target" id="takbeerTarget">34</span>
+                    </button>
+                </div>
+                <div class="dhikr-counter">
+                    <button class="dhikr-btn" data-type="tahleel">
+                        لا إله إلا الله<br>La ilaha illa Allah
+                        <span class="count" id="tahleelCount">0</span>/<span class="target" id="tahleelTarget">33</span>
+                    </button>
+                </div>
+                <div class="dhikr-counter">
+                    <button class="dhikr-btn" data-type="salawat">
+                        اللهم صل على محمد<br>Allahumma salli ala Muhammad
+                        <span class="count" id="salawatCount">0</span>/<span class="target" id="salawatTarget">33</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="share-section">
+                <button id="shareButton" class="btn-share">
+                    <i class="fas fa-share-alt"></i> مشاركة | Share
+                </button>
+                <input type="text" id="shareLink" readonly class="share-link">
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
