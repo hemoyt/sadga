@@ -901,16 +901,6 @@ input[type="number"]:focus {
     margin: 1rem 0;
 }
 
-.share-link {
-    width: 100%;
-    padding: 0.75rem;
-    border: 2px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    background: rgba(255, 255, 255, 0.9);
-    margin-top: 1rem;
-    font-size: 0.9rem;
-}
-
 .btn-share {
     display: flex;
     align-items: center;
@@ -923,6 +913,10 @@ input[type="number"]:focus {
     cursor: pointer;
     transition: all 0.3s ease;
     font-size: 1rem;
+    background: var(--primary-color);
+    -webkit-appearance: none;
+    appearance: none;
+    text-decoration: none;
 }
 
 .btn-share:hover {
@@ -935,28 +929,26 @@ input[type="number"]:focus {
 }
 
 /* Share button colors */
-.whatsapp { background: #25D366; }
-.telegram { background: #0088cc; }
-.twitter { background: #1DA1F2; }
-.copy { background: var(--primary-color); }
+.whatsapp { background: #25D366 !important; }
+.telegram { background: #0088cc !important; }
+.twitter { background: #1DA1F2 !important; }
+.copy { background: var(--primary-color) !important; }
 
-/* Enhanced notifications */
-.notification {
-    position: fixed;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%) translateY(100px);
-    background: var(--primary-color);
-    color: white;
-    padding: 1rem 2rem;
+.share-link {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid var(--border-color);
     border-radius: var(--radius-sm);
-    box-shadow: var(--shadow-lg);
-    z-index: 1000;
-    opacity: 0;
-    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.9);
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    cursor: text;
+    -webkit-appearance: none;
+    appearance: none;
 }
 
-.notification.show {
-    transform: translateX(-50%) translateY(0);
-    opacity: 1;
+/* Prevent text selection on buttons */
+.btn-share {
+    user-select: none;
+    -webkit-user-select: none;
 }
