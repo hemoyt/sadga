@@ -124,13 +124,46 @@
                         <span class="count" id="salawatCount">0</span>/<span class="target" id="salawatTarget">33</span>
                     </button>
                 </div>
-            </div>
-
-            <div class="share-section">
-                <button id="shareButton" class="btn-share">
-                    <i class="fas fa-share-alt"></i> مشاركة | Share
-                </button>
-                <input type="text" id="shareLink" readonly class="share-link">
+            </div>            <div class="share-section">                <div class="edit-name-section">
+                    <h3>تعديل الاسم | Edit Name</h3>
+                    <div class="edit-name-container">
+                        <div class="edit-input-group">
+                            <input type="text" id="editNameInput" class="edit-name-input" placeholder="Enter new name | أدخل الاسم الجديد">
+                            <div class="edit-gender-group">
+                                <label class="radio-label">
+                                    <input type="radio" name="editGender" value="male" checked>
+                                    <span>ذكر | Male</span>
+                                </label>
+                                <label class="radio-label">
+                                    <input type="radio" name="editGender" value="female">
+                                    <span>أنثى | Female</span>
+                                </label>
+                            </div>
+                        </div>
+                        <button id="saveNameButton" class="btn-save">
+                            <i class="fas fa-save"></i> حفظ | Save
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="share-container">
+                    <h3>مشاركة | Share</h3>
+                    <div class="share-buttons">
+                        <button id="shareWhatsApp" class="btn-share whatsapp">
+                            <i class="fab fa-whatsapp"></i> WhatsApp
+                        </button>
+                        <button id="shareTelegram" class="btn-share telegram">
+                            <i class="fab fa-telegram"></i> Telegram
+                        </button>
+                        <button id="shareTwitter" class="btn-share twitter">
+                            <i class="fab fa-twitter"></i> Twitter
+                        </button>
+                        <button id="copyLink" class="btn-share copy">
+                            <i class="fas fa-copy"></i> نسخ الرابط | Copy Link
+                        </button>
+                    </div>
+                    <input type="text" id="shareLink" readonly class="share-link">
+                </div>
             </div>
         </div>
     </div>
