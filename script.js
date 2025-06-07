@@ -44,6 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Update UI
             updateDeceasedInfo(name, gender);
             updateTargets();
+            updateShareLink(); // Add share link update
             
             // Load saved counts from localStorage
             loadProgress();
@@ -59,14 +60,16 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         const gender = document.querySelector('input[name="gender"]:checked').value;
-          // Update targets from input
+        // Update targets from input
         targets = {
             tasbih: parseInt(document.getElementById('tasbih').value) || 33,
             tahmeed: parseInt(document.getElementById('tahmeed').value) || 33,
             takbeer: parseInt(document.getElementById('takbeer').value) || 34,
             tahleel: parseInt(document.getElementById('tahleel').value) || 33,
             salawat: parseInt(document.getElementById('salawat').value) || 33
-        };        // Generate URL
+        };
+
+        // Generate URL
         const params = new URLSearchParams();
         params.set('name', encodeURIComponent(name));
         params.set('gender', gender);
@@ -82,6 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
         dhikrPage.classList.remove('hidden');
         updateDeceasedInfo(name, gender);
         updateTargets();
+        updateShareLink(); // Add share link update
         
         // Initialize localStorage for this page
         initializeLocalStorage();
@@ -188,6 +192,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Save progress to session storage (will be cleared on refresh)
     function saveProgress() {
         sessionStorage.setItem('dhikr-counts', JSON.stringify(counters));
+        updateShareLink(); // Add share link update when progress changes
     }
 
     // Load progress from session storage
@@ -293,20 +298,67 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Share functionality
     shareButton.addEventListener('click', () => {
-        const url = window.location.href;
-        shareLinkInput.value = url;
-        shareLinkInput.classList.remove('hidden');
-        
+        const name = document.getElementById('deceasedName').querySelector('.name-english').textContent.replace('For the deceased: ', '');
+        const gender = document.querySelector('input[name="editGender"]:checked').value;
+        const prefix = gender === 'male' ? 'المرحوم' : 'المرحومة';
+        const shareText = `${prefix} ${name} | Please make dhikr for the deceased 🤲`;
+        const url = document.getElementById('shareLink').value;
+
         if (navigator.share) {
             navigator.share({
                 title: 'Digital Dhikr Page',
-                text: 'Join me in making dhikr for our deceased loved one',
+                text: shareText,
                 url: url
-            }).catch(console.error);
+            }).catch(err => {
+                console.error('Error sharing:', err);
+                fallbackShare();
+            });
         } else {
+            fallbackShare();
+        }
+
+        function fallbackShare() {
+            const shareLinkInput = document.getElementById('shareLink');
+            shareLinkInput.classList.remove('hidden');
             shareLinkInput.select();
-            document.execCommand('copy');
-            alert('Link copied to clipboard | تم نسخ الرابط');
+            try {
+                navigator.clipboard.writeText(url).then(() => {
+                    showNotification('تم نسخ الرابط | Link copied to clipboard');
+                }).catch(() => {
+                    // Fallback to older execCommand if clipboard API fails
+                    document.execCommand('copy');
+                    showNotification('تم نسخ الرابط | Link copied to clipboard');
+                });
+            } catch (err) {
+                console.error('Copy failed:', err);
+                showNotification('فشل نسخ الرابط | Failed to copy link');
+            }
+        }
+    });
+
+    // Copy link button functionality
+    document.getElementById('copyLink').addEventListener('click', () => {
+        const shareLinkInput = document.getElementById('shareLink');
+        const url = shareLinkInput.value;
+        
+        try {
+            navigator.clipboard.writeText(url).then(() => {
+                showNotification('تم نسخ الرابط | Link copied to clipboard');
+            }).catch(fallbackCopy);
+        } catch (err) {
+            fallbackCopy();
+        }
+
+        function fallbackCopy() {
+            shareLinkInput.classList.remove('hidden');
+            shareLinkInput.select();
+            try {
+                document.execCommand('copy');
+                showNotification('تم نسخ الرابط | Link copied to clipboard');
+            } catch (err) {
+                console.error('Copy failed:', err);
+                showNotification('فشل نسخ الرابط | Failed to copy link');
+            }
         }
     });
 
@@ -404,51 +456,53 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update the save button click handler
     document.getElementById('saveNameButton').addEventListener('click', handleNameChange);
 
-    // Update share link
+    // Update share link and text
     function updateShareLink() {
-        const name = document.getElementById('deceasedName').textContent;
+        const name = document.getElementById('deceasedName').querySelector('.name-english').textContent.replace('For the deceased: ', '');
+        const gender = document.querySelector('input[name="editGender"]:checked').value;
         const url = new URL(window.location.href);
+        
+        // Update URL parameters
         url.searchParams.set('name', encodeURIComponent(name));
-        
-        // Add other parameters
-        const gender = document.querySelector('input[name="gender"]:checked').value;
         url.searchParams.set('gender', gender);
-        
-        // Add dhikr counts
-        const dhikrTypes = ['tasbih', 'tahmeed', 'takbeer', 'tahleel', 'salawat'];
-        dhikrTypes.forEach(type => {
-            const count = document.getElementById(`${type}Count`).textContent;
-            const target = document.getElementById(`${type}Target`).textContent;
-            url.searchParams.set(`${type}_count`, count);
-            url.searchParams.set(`${type}_target`, target);
+
+        // Add targets to URL
+        Object.entries(targets).forEach(([type, value]) => {
+            url.searchParams.set(`${type}_target`, value);
         });
-        
-        document.getElementById('shareLink').value = url.toString();
-    }    // Function to get share text
+
+        // Set the share link
+        const shareLinkInput = document.getElementById('shareLink');
+        shareLinkInput.value = url.toString();
+
+        // Update individual sharing buttons
+        const text = `${gender === 'male' ? 'المرحوم' : 'المرحومة'} ${name} | Please make dhikr for the deceased 🤲`;
+        const encodedText = encodeURIComponent(text);
+        const encodedUrl = encodeURIComponent(url.toString());
+
+        // Update WhatsApp button
+        document.getElementById('shareWhatsApp').onclick = () => {
+            window.open(`https://wa.me/?text=${encodedText}%0A%0A${encodedUrl}`, '_blank');
+        };
+
+        // Update Telegram button
+        document.getElementById('shareTelegram').onclick = () => {
+            window.open(`https://t.me/share/url?url=${encodedUrl}&text=${encodedText}`, '_blank');
+        };
+
+        // Update Twitter button
+        document.getElementById('shareTwitter').onclick = () => {
+            window.open(`https://twitter.com/intent/tweet?text=${encodedText}&url=${encodedUrl}`, '_blank');
+        };
+    }
+
+    // Function to get share text
     function getShareText() {
         const nameElement = document.getElementById('deceasedName');
         const name = nameElement.querySelector('.name-english').textContent.replace('For the deceased: ', '');
         const gender = document.querySelector('input[name="editGender"]:checked').value;
         const prefix = gender === 'male' ? 'المرحوم' : 'المرحومة';
         return `${prefix} ${name} | Please make Dhikr for the deceased`;
-    }
-
-    // Update share link
-    function updateShareLink() {
-        const currentUrl = new URL(window.location.href);
-        const name = document.getElementById('deceasedName').querySelector('.name-english').textContent.replace('For the deceased: ', '');
-        const gender = document.querySelector('input[name="editGender"]:checked').value;
-        
-        currentUrl.searchParams.set('name', encodeURIComponent(name));
-        currentUrl.searchParams.set('gender', gender);
-        
-        // Add dhikr counts
-        Object.keys(counters).forEach(type => {
-            currentUrl.searchParams.set(`${type}_count`, counters[type]);
-            currentUrl.searchParams.set(`${type}_target`, targets[type]);
-        });
-        
-        document.getElementById('shareLink').value = currentUrl.toString();
     }
 
     // Social share buttons
